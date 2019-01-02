@@ -2,4 +2,6 @@
 ### 基于surfaceView
 ### 触摸对焦拍摄,并图像识别
 ### 基于传感器自动对焦拍摄,并图像识别
-### 拍摄剪切
+### 剪切
+
+![image](https://github.com/Zhouyulin1220/CamreaModel/blob/master/image/bitmap.jpg)
