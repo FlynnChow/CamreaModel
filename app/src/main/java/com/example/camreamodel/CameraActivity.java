@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -15,13 +16,22 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import static android.content.ContentValues.TAG;
 
 public class CameraActivity extends Activity implements View.OnClickListener, View.OnTouchListener,SensorEventListener {
 
@@ -49,8 +59,11 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     private View view_2;
     private View view_3;
     private int values_view[][]=new int[][]{{0,0},{0,0},{0,0}};
+    private TFLiteUtil tflite;
 
     public boolean isDialogShow = false;
+    ImageView dialog_image[]=new ImageView[3];
+    TextView dialog_text[][]=new TextView[3][3];
 
     public static void startCameraActivity(Context context) {
         ((Activity) context).startActivityForResult(new Intent(context, CameraActivity.class), REQUEST_CODE);
@@ -72,22 +85,27 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         setting = (ImageView) findViewById(R.id.camera_setting);
         camera_discern = (ImageView) findViewById(R.id.camera_discern);
         cameraView = (CameraView) findViewById(R.id.camera_view);
+        view_1 = (View)findViewById(R.id.view_1);
+        view_2 = (View)findViewById(R.id.view_2);
+        view_3 = (View)findViewById(R.id.view_3);
+        initDialog(view_1,0);
+        initDialog(view_2,1);
+        initDialog(view_3,2);
+
 
         back.setOnClickListener(this);
         light.setOnClickListener(this);
         setting.setOnClickListener(this);
         camera_discern.setOnClickListener(this);
-        camera_discern.setOnTouchListener(this);
-
         cameraView.setInstence(this);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-        view_1 = (View)findViewById(R.id.view_1);
-        view_2 = (View)findViewById(R.id.view_2);
-        view_3 = (View)findViewById(R.id.view_3);
+        tflite=new TFLiteUtil(getApplicationContext());
+        tflite.init();
     }
+
 
     @Override
     public void onClick(View view) {
@@ -225,9 +243,10 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                                 @Override
                                 public void run() {
                                     if(isDialogShow){
-                                        showDialog(getImagePath(),view_1,10,0);
-                                        showDialog(getImagePath(),view_2,10,1);
-                                        showDialog(getImagePath(),view_3,10,2);
+                                        float temp[][]=tflite.predict_image(getImagePath());
+                                        showDialog(getImagePath(),view_1,10,0,(int)temp[0][1],temp[1][1],0);
+                                        showDialog(getImagePath(),view_2,10,1,(int)temp[0][2],temp[1][2],1);
+                                        showDialog(getImagePath(),view_3,10,2,(int)temp[0][3],temp[1][3],2);
                                     }
 
                                 }
@@ -386,8 +405,10 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
 
     }
 
-    private void showDialog(String path,View view,int random,int tag){
-        ((ImageView)(view.findViewById(R.id.dialog_image))).setImageBitmap(BitmapFactory.decodeFile(path));
+    private void showDialog(String path,View view,int random,int tag,int id,float maybe,int flag){
+        dialog_image[flag].setImageBitmap(BitmapFactory.decodeFile(path));
+        dialog_text[flag][0].setText("概率："+String.format("%.2f",(maybe*100))+"%");
+        dialog_text[flag][1].setText("概率："+String.format("%.2f",(maybe*100))+"%");
         int r_x=(int)(Math.random()*10)+random;
         int r_y=(int)(Math.random()*15);
         if(((int)(Math.random()*2))>=1)
@@ -415,6 +436,10 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         }
     }
 
-
-
+    private void initDialog(View view,int flag){
+        dialog_image[flag]=(ImageView)view.findViewById(R.id.dialog_image);
+        dialog_text[flag][0]=(TextView) view.findViewById(R.id.label_1);
+        dialog_text[flag][1]=(TextView) view.findViewById(R.id.label_2);
+        dialog_text[flag][2]=(TextView) view.findViewById(R.id.label_3);
+    }
 }

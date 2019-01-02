@@ -3,5 +3,20 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="my_color"></color>
+    <color name="Green_100">#c8e6c9</color>
+    <color name="Green_200">#a5d6a7</color>
+    <color name="Green_300">#81c784</color>
+    <color name="Green_400">#66bb6a</color>
+    <color name="Green_500">#4caf50</color>
+    <color name="Green_600">#43a047</color>
+    <color name="Green_700">#388e3c</color>
+    <color name="Green_800">#2e7d32</color>
+    <color name="Green_900">#1b5e20</color>
+    <color name="Accent_light_green_700">#64dd17</color>
+    <color name="Accent_light_green_500">#8bc34a</color>
+    <color name="Accent_light_green_200">#c5e1a5</color>
+    <color name="Accent_light_green_300">#aed581</color>
+    <color name="Accent_light_green_400">#9ccc65</color>
+    <color name="Accent_light_green_100">#dcedc8</color>
+    <color name="Accent_light_green_600">#7cb342</color>
 </resources>
