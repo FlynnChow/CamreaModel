@@ -15,17 +15,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-
-import static android.content.ContentValues.TAG;
 
 public class CameraActivity extends Activity implements View.OnClickListener, View.OnTouchListener,SensorEventListener {
 
@@ -49,6 +45,13 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     public boolean isFocusing = false;
     public boolean isAutoFocus = true;
 
+    private View view_1;
+    private View view_2;
+    private View view_3;
+    private int values_view[][]=new int[][]{{0,0},{0,0},{0,0}};
+
+    public boolean isDialogShow = false;
+
     public static void startCameraActivity(Context context) {
         ((Activity) context).startActivityForResult(new Intent(context, CameraActivity.class), REQUEST_CODE);
     }
@@ -62,7 +65,6 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     }
 
     private void init() {
-
         containerLayout = (LinearLayout) findViewById(R.id.container_layout);
         cameraCrop = (ImageView) findViewById(R.id.camera_crop);
         back = (ImageView) findViewById(R.id.back);
@@ -81,16 +83,21 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        view_1 = (View)findViewById(R.id.view_1);
+        view_2 = (View)findViewById(R.id.view_2);
+        view_3 = (View)findViewById(R.id.view_3);
     }
 
     @Override
     public void onClick(View view) {
+        closeDialog();
         switch (view.getId()) {
             case R.id.camera_discern:
-                takePhoto();
+                cameraView.focus(false);
                 break;
             case R.id.back:
-                back.setImageResource(R.mipmap.back_2);
+                back.setImageResource(R.mipmap.back_w);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -102,7 +109,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                back.setImageResource(R.mipmap.back);
+                                back.setImageResource(R.mipmap.back_g);
                                 finish();
                             }
                         });
@@ -110,19 +117,26 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                 }).start();
                 break;
             case R.id.camera_setting:
-                setting.setImageResource(R.mipmap.setting_2);
+                setting.setImageResource(R.mipmap.setting_0);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            Thread.sleep(250);
+                            Thread.sleep(100);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setting.setImageResource(R.mipmap.setting_1);
+                                }
+                            });
+                            Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                setting.setImageResource(R.mipmap.setting);
+                                setting.setImageResource(R.mipmap.setting_2);
                             }
                         });
                     }
@@ -146,7 +160,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    light.setImageResource(R.mipmap.lightg_close);
+                                    light.setImageResource(R.mipmap.light_close);
                                     cameraView.closeLight();
                                 }
                             });
@@ -162,10 +176,11 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         switch (view.getId()) {
             case R.id.camera_discern:
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    camera_discern.setImageResource(R.mipmap.camera_discern_white);
+                    camera_discern.setImageResource(R.mipmap.eye_close);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    camera_discern.setImageResource(R.mipmap.camera_discern);
+                    camera_discern.setImageResource(R.mipmap.eye_open);
                 }
+                break;
         }
         return false;
     }
@@ -205,14 +220,23 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                                 bitmap.recycle();
                             }
 
-                            Intent intent = new Intent();
-                            intent.putExtra("result",getImagePath());
-                            setResult(RESULT_OK,intent);
-                            finish();
+                            camera.startPreview();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(isDialogShow){
+                                        showDialog(getImagePath(),view_1,10,0);
+                                        showDialog(getImagePath(),view_2,10,1);
+                                        showDialog(getImagePath(),view_3,10,2);
+                                    }
+
+                                }
+                            });
                         }
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(750);
                             isAutoFocus = true;
+                            isFocusing = false;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -226,6 +250,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this,sensor,SensorManager.SENSOR_DELAY_NORMAL);
+        ((ImageView)findViewById(R.id.camera_discern)).setImageResource(R.mipmap.eye_open);
     }
 
     @Override
@@ -264,7 +289,6 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     }
 
     public String getImagePath(){
-        Log.d(TAG, "getImagePath: 图片"+imagePath);
         return imagePath;
     }
 
@@ -295,6 +319,14 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         return frame.contains((int)x,(int)y);
     }
 
+    public boolean isDialogView(MotionEvent event,int id){
+        Rect frame = new Rect();
+        ((View)findViewById(id)).getHitRect(frame);
+        float x = event.getX();
+        float y = event.getY();
+        return frame.contains((int)x,(int)y);
+    }
+
     /**
      * 自动对焦
      */
@@ -309,10 +341,8 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-
         if (sensorEvent.sensor == null||isFocusing||!isAutoFocus)
             return;
-
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             int x = (int) sensorEvent.values[0];
             int y = (int) sensorEvent.values[1];
@@ -324,6 +354,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                 int dz = Math.abs(z-last_z);
                 double value = Math.sqrt(dx*dx+dy*dy+dz*dz);
                 if (value > moveIs){
+                    closeDialog();
                     STATUS = STATUS_MOVE;
                     isCanFosus = false;
                 }else{
@@ -334,7 +365,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                         }
                         else{
                             if(time - last_time>500){
-                                cameraView.focus();
+                                cameraView.focus(true);
                                 STATUS = STATUS_STATIC;
                             }
                         }
@@ -354,4 +385,36 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
+
+    private void showDialog(String path,View view,int random,int tag){
+        ((ImageView)(view.findViewById(R.id.dialog_image))).setImageBitmap(BitmapFactory.decodeFile(path));
+        int r_x=(int)(Math.random()*10)+random;
+        int r_y=(int)(Math.random()*15);
+        if(((int)(Math.random()*2))>=1)
+            r_x=-r_x;
+        if(((int)(Math.random()*2))>=1)
+            r_y=-r_y;
+        r_x-=values_view[tag][0];values_view[tag][0]=r_x;
+        r_y-=values_view[tag][1];values_view[tag][1]=r_y;
+        view.setTranslationX(r_x);
+        view.setTranslationY(r_y);
+        view.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
+
+    public void closeDialog(){
+        if(isDialogShow){
+            isDialogShow=false;
+            view_1.setVisibility(View.GONE);
+            view_2.setVisibility(View.GONE);
+            view_3.setVisibility(View.GONE);
+        }
+    }
+
+
+
 }

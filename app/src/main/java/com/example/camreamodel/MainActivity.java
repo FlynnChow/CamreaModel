@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
                 CameraActivity.startCameraActivity(MainActivity.this);
             }
         });
+
+
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
         }
@@ -36,14 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(resultCode!=RESULT_OK){
-            return;
-        }
-        if(requestCode == CameraActivity.REQUEST_CODE){
-            String path = data.getStringExtra("result");
-            if(!TextUtils.isEmpty(path)){
-                ((ImageView)findViewById(R.id.show_bitmap)).setImageBitmap(BitmapFactory.decodeFile(path));
-            }
-        }
+
+
     }
 }

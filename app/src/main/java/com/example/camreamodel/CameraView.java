@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -16,13 +17,14 @@ import android.view.SurfaceView;
 import java.io.IOException;
 import java.util.List;
 
+import static android.content.ContentValues.TAG;
+
 
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
 
     private Camera mCamera;
     private CameraActivity mActivity;
     private Context context;
-
 
     public void setInstence(CameraActivity activity){
         mActivity=activity;
@@ -196,14 +198,28 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(event.getPointerCount()==1){
-            if (mActivity.isCropView(event)){
-                focus();
+            boolean isDialog = false;
+            if(mActivity.isDialogView(event,R.id.view_1)){
+                isDialog=true;
+            }
+            if(mActivity.isDialogView(event,R.id.view_2)){
+                isDialog=true;
+            }
+            if(mActivity.isDialogView(event,R.id.view_3)){
+                isDialog=true;
+            }
+            if (mActivity.isCropView(event)&&!isDialog){
+                if(mActivity.isDialogShow)
+                    mActivity.closeDialog();
+                else
+                    focus(true);
             }
         }
         return super.onTouchEvent(event);
     }
 
-    public void focus() {
+    public void focus(boolean isShowDialog) {
+        mActivity.isDialogShow = isShowDialog;
         if (mCamera != null) {
             mActivity.isFocusing = true;
             mActivity.isAutoFocus = false;
