@@ -5,6 +5,7 @@
         <attr name="shadow_color" format="color" />
         <attr name="shadow_size" format="dimension" />
         <attr name="radius" format="dimension" />
+        <attr name="showTriangle" format="dimension" />
         <attr name="direction" format="enum">
             <enum name="left" value="1" />
             <enum name="top" value="2" />

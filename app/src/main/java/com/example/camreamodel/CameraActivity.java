@@ -58,7 +58,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     private View view_1;
     private View view_2;
     private View view_3;
-    private int values_view[][]=new int[][]{{0,0},{0,0},{0,0}};
+    private int values_x[]=new int[]{0,0,0},values_y=0;
     private TFLiteUtil tflite;
 
     public boolean isDialogShow = false;
@@ -88,10 +88,9 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         view_1 = (View)findViewById(R.id.view_1);
         view_2 = (View)findViewById(R.id.view_2);
         view_3 = (View)findViewById(R.id.view_3);
-        initDialog(view_1,0);
-        initDialog(view_2,1);
-        initDialog(view_3,2);
-
+        initDialog(view_1,0,true);
+        initDialog(view_2,1,true);
+        initDialog(view_3,2,false);
 
         back.setOnClickListener(this);
         light.setOnClickListener(this);
@@ -244,9 +243,10 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                                 public void run() {
                                     if(isDialogShow){
                                         float temp[][]=tflite.predict_image(getImagePath());
-                                        showDialog(getImagePath(),view_1,10,0,(int)temp[0][1],temp[1][1],0);
-                                        showDialog(getImagePath(),view_2,10,1,(int)temp[0][2],temp[1][2],1);
-                                        showDialog(getImagePath(),view_3,10,2,(int)temp[0][3],temp[1][3],2);
+                                        showDialog(getImagePath(),(int)temp[0][1],temp[1][1],0);
+                                        showDialog(getImagePath(),(int)temp[0][2],temp[1][2],1);
+                                        showDialog(getImagePath(),(int)temp[0][3],temp[1][3],2);
+                                        TransLation();
                                     }
 
                                 }
@@ -405,21 +405,36 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
 
     }
 
-    private void showDialog(String path,View view,int random,int tag,int id,float maybe,int flag){
+    private void showDialog(String path,int id,float maybe,int flag){
         dialog_image[flag].setImageBitmap(BitmapFactory.decodeFile(path));
-        dialog_text[flag][0].setText("概率："+String.format("%.2f",(maybe*100))+"%");
+        dialog_text[flag][0].setText("名称："+tflite.mylabel[id]);
         dialog_text[flag][1].setText("概率："+String.format("%.2f",(maybe*100))+"%");
-        int r_x=(int)(Math.random()*10)+random;
-        int r_y=(int)(Math.random()*15);
-        if(((int)(Math.random()*2))>=1)
-            r_x=-r_x;
-        if(((int)(Math.random()*2))>=1)
-            r_y=-r_y;
-        r_x-=values_view[tag][0];values_view[tag][0]=r_x;
-        r_y-=values_view[tag][1];values_view[tag][1]=r_y;
-        view.setTranslationX(r_x);
-        view.setTranslationY(r_y);
-        view.setVisibility(View.VISIBLE);
+    }
+
+    private void TransLation(){
+        int right=0;
+        if(Math.random()>=0.5)
+            right=100;
+        int a=-((int)(Math.random()*50)+150)+right;
+        Log.d(TAG, "TransLation: 值："+a);
+        int b=-((int)(Math.random()*25)+25)+right;
+        int c=(int)(Math.random()*50)+50+right;
+
+        view_1.setTranslationX(a);
+        view_2.setTranslationX(b);
+        view_3.setTranslationX(c);
+
+        int y=(int)(Math.random()*125)+5;
+        if(Math.random()>=0.5){
+            y=-y-100;
+        }
+
+        view_1.setTranslationY(y);
+        view_2.setTranslationY(y);
+        view_3.setTranslationY(y);
+        view_1.setVisibility(View.VISIBLE);
+        view_2.setVisibility(View.VISIBLE);
+        view_3.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -436,7 +451,14 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         }
     }
 
-    private void initDialog(View view,int flag){
+    private void initDialog(View view,int flag,boolean isT){
+        if(isT){
+            dialog_image[flag]=(ImageView)view.findViewById(R.id.oval_image);
+            dialog_text[flag][0]=(TextView) view.findViewById(R.id.oval_1);
+            dialog_text[flag][1]=(TextView) view.findViewById(R.id.oval_2);
+            dialog_text[flag][2]=(TextView) view.findViewById(R.id.oval_3);
+            return;
+        }
         dialog_image[flag]=(ImageView)view.findViewById(R.id.dialog_image);
         dialog_text[flag][0]=(TextView) view.findViewById(R.id.label_1);
         dialog_text[flag][1]=(TextView) view.findViewById(R.id.label_2);

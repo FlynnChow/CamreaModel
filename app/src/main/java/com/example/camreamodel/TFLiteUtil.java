@@ -29,10 +29,24 @@ public class TFLiteUtil {
         this.context=context;
     }
     
-    public void  init(){
+    public void init(){
         readCacheLabelFromLocalFile();
         copy_file_from_asset(context,assets_path,Environment.getExternalStorageState()+File.separator+assets_path);
         load_model();
+    }
+
+    public float[][] predict_image(String image_path){
+        Bitmap bmp=MyUtil.getScaleBitmap(image_path,context);
+        ByteBuffer inputData=MyUtil.getScaledMatrix(bmp,ddims);
+        float[][] labelP=new float[1][1001];
+        long start=System.currentTimeMillis();
+        lite.run(inputData,labelP);
+        long end=System.currentTimeMillis();
+        long time=end-start;
+        float[] result=new float[labelP[0].length];
+        System.arraycopy(labelP[0],0,result,0,labelP[0].length);
+        float r[][]=get_max_result(result);
+        return r;
     }
     
     private void copy_file_from_asset(Context context, String oldPath, String newPath) {
@@ -74,7 +88,6 @@ public class TFLiteUtil {
     }
 
     private void load_model(){
-
         try {
             AssetFileDescriptor fileDescriptor=context.getAssets().openFd("mobilenet_v2_1.4_224.tflite");
             FileInputStream inputStream=new FileInputStream(fileDescriptor.getFileDescriptor());
@@ -125,23 +138,6 @@ public class TFLiteUtil {
                 }
             }
         }
-        Log.d(TAG, "run: 识别结果"+r[0][1]+" "+r[0][2]+" "+r[0][3]);
-        Log.d(TAG, "run: 识别结果"+r[1][1]+" "+r[1][2]+" "+r[1][3]);
-        return r;
-    }
-
-
-    public float[][] predict_image(String image_path){
-        Bitmap bmp=MyUtil.getScaleBitmap(image_path,context);
-        ByteBuffer inputData=MyUtil.getScaledMatrix(bmp,ddims);
-        float[][] labelP=new float[1][1001];
-        long start=System.currentTimeMillis();
-        lite.run(inputData,labelP);
-        long end=System.currentTimeMillis();
-        long time=end-start;
-        float[] result=new float[labelP[0].length];
-        System.arraycopy(labelP[0],0,result,0,labelP[0].length);
-        float r[][]=get_max_result(result);
         return r;
     }
 }

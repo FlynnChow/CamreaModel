@@ -29,12 +29,10 @@ public class BubbleLayout extends FrameLayout {
     @IntDef({LEFT, TOP, RIGHT, BOTTOM})
     private @interface Direction {
     }
-
     /**
      * 圆角大小
      */
     private int mRadius;
-
     /**
      * 三角形的方向
      */
@@ -57,6 +55,7 @@ public class BubbleLayout extends FrameLayout {
 
     private RectF mRect;
 
+    private int showTriangle=1;
     public BubbleLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
@@ -71,6 +70,7 @@ public class BubbleLayout extends FrameLayout {
                 Color.parseColor("#999999"));
         int defShadowSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX,
                 4, getResources().getDisplayMetrics());
+        showTriangle = (int) ta.getDimension(R.styleable.BubbleLayout_showTriangle,1);
         //阴影尺寸
         int shadowSize = ta.getDimensionPixelSize(R.styleable.BubbleLayout_shadow_size, defShadowSize);
         mRadius = ta.getDimensionPixelSize(R.styleable.BubbleLayout_radius, 0);
@@ -162,9 +162,9 @@ public class BubbleLayout extends FrameLayout {
         }
 
         mPath.addRoundRect(mRect, mRadius, mRadius, Path.Direction.CCW);
-        mPath.moveTo(mDatumPoint.x + triangularLength / 2, mDatumPoint.y);
-        mPath.lineTo(mDatumPoint.x, mDatumPoint.y + triangularLength / 2);
-        mPath.lineTo(mDatumPoint.x - triangularLength / 2, mDatumPoint.y);
+        mPath.moveTo(mDatumPoint.x + triangularLength / 2*showTriangle, mDatumPoint.y);
+        mPath.lineTo(mDatumPoint.x, mDatumPoint.y + triangularLength / 2*showTriangle);
+        mPath.lineTo(mDatumPoint.x - triangularLength / 2*showTriangle, mDatumPoint.y);
         mPath.close();
         canvas.drawPath(mPath, mBorderPaint);
     }
