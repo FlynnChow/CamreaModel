@@ -199,16 +199,19 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
     public boolean onTouchEvent(MotionEvent event) {
         if(event.getPointerCount()==1){
             boolean isDialog = false;
-            if(mActivity.isDialogView(event,R.id.view_1)){
-                isDialog=true;
-            }
-            if(mActivity.isDialogView(event,R.id.view_2)){
-                isDialog=true;
-            }
-            if(mActivity.isDialogView(event,R.id.view_3)){
-                isDialog=true;
+            if(mActivity.isDialogShow){
+                if(mActivity.isDialogView(event,R.id.view_1)){
+                    isDialog=true;
+                }
+                if(mActivity.isDialogView(event,R.id.view_2)){
+                    isDialog=true;
+                }
+                if(mActivity.isDialogView(event,R.id.view_3)){
+                    isDialog=true;
+                }
             }
             if (mActivity.isCropView(event)&&!isDialog){
+                mActivity.AutoFocusing=false;
                 if(mActivity.isDialogShow)
                     mActivity.closeDialog();
                 else

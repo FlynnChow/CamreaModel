@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -16,7 +15,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,12 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static android.content.ContentValues.TAG;
 
@@ -54,7 +48,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
 
     public boolean isFocusing = false;
     public boolean isAutoFocus = true;
-
+    public  boolean AutoFocusing =false;
     private View view_1;
     private View view_2;
     private View view_3;
@@ -243,6 +237,13 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                                 public void run() {
                                     if(isDialogShow){
                                         float temp[][]=tflite.predict_image(getImagePath());
+                                        if(AutoFocusing){
+                                            AutoFocusing=false;
+                                            if (temp[1][1]<=0.03){
+                                                isDialogShow=false;
+                                                return;
+                                            }
+                                        }
                                         showDialog(getImagePath(),(int)temp[0][1],temp[1][1],0);
                                         showDialog(getImagePath(),(int)temp[0][2],temp[1][2],1);
                                         showDialog(getImagePath(),(int)temp[0][3],temp[1][3],2);
@@ -253,7 +254,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                             });
                         }
                         try {
-                            Thread.sleep(750);
+                            Thread.sleep(400);
                             isAutoFocus = true;
                             isFocusing = false;
                         } catch (InterruptedException e) {
@@ -384,6 +385,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                         }
                         else{
                             if(time - last_time>500){
+                                AutoFocusing=true;
                                 cameraView.focus(true);
                                 STATUS = STATUS_STATIC;
                             }
@@ -416,7 +418,6 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
         if(Math.random()>=0.5)
             right=100;
         int a=-((int)(Math.random()*50)+150)+right;
-        Log.d(TAG, "TransLation: 值："+a);
         int b=-((int)(Math.random()*25)+25)+right;
         int c=(int)(Math.random()*50)+50+right;
 

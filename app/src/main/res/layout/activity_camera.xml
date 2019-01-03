@@ -48,20 +48,20 @@
                 android:id="@+id/back"
                 android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@mipmap/back_g"/>
             <ImageView
                 android:id="@+id/light"
                 android:layout_centerInParent="true"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@mipmap/light_close"/>
 
             <ImageView
                 android:id="@+id/camera_setting"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
