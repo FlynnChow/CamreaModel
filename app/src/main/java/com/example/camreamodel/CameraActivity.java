@@ -133,14 +133,14 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                     @Override
                     public void run() {
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(50);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     setting.setImageResource(R.mipmap.setting_1);
                                 }
                             });
-                            Thread.sleep(100);
+                            Thread.sleep(50);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -211,7 +211,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                         if (bytes != null) {
                             //读取照片
                             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            camera.stopPreview();
+                            //camera.stopPreview();
                         }
                         if (bitmap != null) {
                             //bitmap旋转90度
@@ -384,7 +384,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
                             last_time = time;
                         }
                         else{
-                            if(time - last_time>500){
+                            if(time - last_time>1200){
                                 AutoFocusing=true;
                                 cameraView.focus(true);
                                 STATUS = STATUS_STATIC;
@@ -444,7 +444,9 @@ public class CameraActivity extends Activity implements View.OnClickListener, Vi
     }
 
     public void closeDialog(){
-        if(isDialogShow){
+        if(view_1.getVisibility()==View.VISIBLE||
+                view_2.getVisibility()==View.VISIBLE||
+                view_3.getVisibility()==View.VISIBLE){
             isDialogShow=false;
             view_1.setVisibility(View.GONE);
             view_2.setVisibility(View.GONE);
